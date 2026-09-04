@@ -1,0 +1,3 @@
+<template>
+    <h1>How did you get here?</h1>
+</template>
