@@ -20,9 +20,9 @@ const emit = defineEmits(['continue'])
             <option disabled value ="">Select...</option>
             <option 
             v-for="country in props.countries" 
-            :key="country" 
+            :key="country.id" 
             :value="country">
-            {{ country }}
+            {{ country.name }}
             </option>
         </select>
       <button @click="emit('continue', selected)">continue</button>

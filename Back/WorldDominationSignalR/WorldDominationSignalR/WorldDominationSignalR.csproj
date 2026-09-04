@@ -20,4 +20,15 @@
       <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="10.2.3" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Country\" />
+	<None Update="Data/countries.json">
+		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	</None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="Service\Data\countries.json" />
+    </ItemGroup>
+
 </Project>

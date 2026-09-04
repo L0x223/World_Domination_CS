@@ -1,27 +1,61 @@
 <script setup>
-import { defineProps, defineEmits, ref } from 'vue'
+import { ref } from 'vue'
+import { checkSessionNameAvailability, createSession, joinSessionByCode } from '@/server/RequstHandlers';
 
 const sessionName = ref('')
 const props = defineProps({
-  show: Boolean
+  show: Boolean,
+  isTaken: Boolean,
+  nickname: String
 })
 
-const emit = defineEmits(['close', 'createSession'])
+const emit = defineEmits(['close', 'createSession', 'update:isTaken'])
+
+
+async function onSessionNameInput(e) {
+  const name = e.target.value.trim()
+  if (name === '') {
+    emit('update:isTaken', false)
+    return
+  }
+  const available = await checkSessionNameAvailability(name)
+  if (sessionName.value.trim() !== name) return
+  emit('update:isTaken', !available)
+}
+
+async function onCreateClick() {
+  const createResult = await createSession(sessionName.value)
+  if (!createResult.success) {
+    emit('update:isTaken', createResult.reason === 'NameTaken')
+    return
+  }
+
+  const joinResult = await joinSessionByCode(createResult.joinCode, props.nickname)
+  if (joinResult.success) {
+    emit('createSession', {
+      sessionId: joinResult.sessionId,
+      joinCode: createResult.joinCode,
+      sessionName: sessionName.value
+    })
+  } else {
+    console.error('Created session but failed to join it:', joinResult.reason)
+    // decide how to surface this - unlikely path but shouldn't be silent
+  }
+}
 </script>
 
 <template>
   <div v-if="props.show" class="modal">
     <div class="modal-content">
       <slot></slot>
-        <p>Session name: <input v-model="sessionName" placeholder="enter here" /></p>
+        <p>Session name: <input v-model="sessionName" @input="onSessionNameInput" placeholder="enter here" /></p>
+        <p v-if="props.isTaken" class="error">This session name is already taken</p>  
       <button @click="emit('close')">Close</button>
-      <button @click="emit('createSession', sessionName.value)">Create</button>
+      <button @click="onCreateClick" :disabled="props.isTaken">Create</button>
     </div>
   </div>
 </template>
 
-
-//TODO use style
 <style scoped>
 .modal {
   position: fixed;
@@ -36,4 +70,11 @@ const emit = defineEmits(['close', 'createSession'])
   padding: 20px;
   border-radius: 8px;
 }
+.error {
+  color: red;
+  font-weight: bold;
+  font-size: 0.8em;
+  margin-left: 108px;
+}
+
 </style>

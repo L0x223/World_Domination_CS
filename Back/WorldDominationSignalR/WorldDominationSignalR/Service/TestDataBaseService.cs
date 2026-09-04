@@ -5,16 +5,17 @@ namespace WorldDominationSignalR.Service;
 public class TestDataBaseService : IDataBaseService
 {
     public List<Player> Players { get; }
-    
+
     public TestDataBaseService()
     {
         Players = new List<Player>()
         {
-            new Player() {Nickname="Lox223"},
-            new Player() {Nickname="BorisJonson"},
-            new Player() {Nickname="Lalka223"},
+            new Player() { Nickname = "Lox223" },
+            new Player() { Nickname = "BorisJonson" },
+            new Player() { Nickname = "Lalka223" },
         };
     }
+
     public Task<Player?> GetByNickname(string nickname)
     {
         var player = Players.FirstOrDefault(p => p.Nickname.ToUpper().Equals(nickname.ToUpper()));
@@ -30,7 +31,6 @@ public class TestDataBaseService : IDataBaseService
     public Task AddPlayerAsync(Player player)
     {
         Players.Add(player);
-        Console.WriteLine(Players.Count);
         return Task.CompletedTask;
     }
 }

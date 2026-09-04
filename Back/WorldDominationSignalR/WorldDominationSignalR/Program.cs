@@ -8,6 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSignalR();
 
 builder.Services.AddSingleton<IGameStateService, GameStateService>();
+builder.Services.AddSingleton<ICountryDataService, CountryDataService>();
 
 
 var useTestDb = builder.Configuration.GetValue<bool>("UseTestDatabase");
@@ -26,7 +27,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("VueClient", policy =>
     {
-        policy.WithOrigins("http://localhost:5173")
+        policy.WithOrigins("http://localhost:5173", "http://localhost:5174")
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials(); //WebSocket handshake

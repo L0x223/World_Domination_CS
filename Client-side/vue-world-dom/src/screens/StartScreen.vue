@@ -1,19 +1,21 @@
   <script setup>
   import { Player } from '@/states/player';
   import { ref } from 'vue';
-  import { isNickAvailable, addPlayerNickToDb } from '@/server/RequstHandlers';
+  import { isNickAvailable, addPlayerNickToDb, joinSessionByCode } from '@/server/RequstHandlers';
   import CreateSessionModal from '@/components/CreateSessionModal.vue';
+  import { SessionState } from '@/states/session';
+  import { LobbyState } from '@/states/lobby';
 
   let createSessionShowModal = ref(false)
+  let sessionNameTaken = ref(false)
   let nickIsTaken = ref(false)
 
-  function handleCreateSession(sessionName) {
-  createSessionShowModal.value = false
-
-  ws.createSession(sessionName)
-
-  window.location.hash = '/lobby'
+  function handleCreateSession({ sessionId, joinCode, sessionName }) {
+    createSessionShowModal.value = false
+    processSessionCreation(sessionId, joinCode, sessionName)
+    window.location.hash = '/lobby'          
   }
+
 
   async function checkNickAvailability(e) {
     
@@ -37,6 +39,24 @@
       }
   }
 
+  async function changeCreateSessionShowModal() {
+      await addPlayerNick();
+      if (!nickIsTaken.value) {
+        createSessionShowModal.value = true
+      }
+      else {
+        console.log("Nick is taken, cannot create modal")
+      }
+  }
+
+  function processSessionCreation(sessionId, joinCode, sessionName) {
+    SessionState.sessionId = sessionId
+    SessionState.joinCode = joinCode
+    SessionState.sessionName = sessionName
+    joinSessionByCode(joinCode, Player.nick)
+    console.log("Session created with name: " + sessionName)
+    //TODO HANDLE ALL CONSEQUENCES OF SESSION CREATION
+  }
 </script>
 
   <template>
@@ -51,11 +71,13 @@
       <p v-if="nickIsTaken" class="error">This nick is already taken</p>  
 
       <div class="buttons">
-        <button @click="">Join session</button>
-        <button @click="createSessionShowModal = true">Create session</button>
+        <button @click="" :disabled="nickIsTaken">Join session</button>
+        <button @click="changeCreateSessionShowModal" :disabled="nickIsTaken">Create session</button>
       </div>
     </div>
     <CreateSessionModal :show="createSessionShowModal"
+     :nickname="Player.nick"
+     v-model:isTaken="sessionNameTaken"
      @close="createSessionShowModal = false" 
      @createSession="handleCreateSession"
      ></CreateSessionModal>

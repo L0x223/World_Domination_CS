@@ -8,5 +8,5 @@ export interface Player {
 
 export const LobbyState = reactive({
   players: [] as Player[],
-  selectedCountry: '',
+  selectedCountry: null as string | null,
 })

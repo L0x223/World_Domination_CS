@@ -1,0 +1,94 @@
+[
+  {
+    "id": "1",
+    "name": "Belarus",
+    "leaderIconId": "BelarusIcon.png",
+    "cities": [
+      {
+        "id": "1",
+        "name": "Minsk"
+      },
+      {
+        "id": "2",
+        "name": "Bobruysk"
+      },
+      {
+        "id": "3",
+        "name": "Brest"
+      },
+      {
+        "id": "4",
+        "name": "Grodno"
+      }
+    ]
+  },
+  {
+    "id": "2",
+    "name": "Russia",
+    "leaderIconId": "RussiaIcon.png",
+    "cities": [
+      {
+        "id": "1",
+        "name": "Moscow"
+      },
+      {
+        "id": "2",
+        "name": "st. PetersBurg"
+      },
+      {
+        "id": "3",
+        "name": "Kazan"
+      },
+      {
+        "id": "4",
+        "name": "Grozny"
+      }
+    ]
+  },
+  {
+    "id": "3",
+    "name": "USA",
+    "leaderIconId": "USAIcon.png",
+    "cities": [
+      {
+        "id": "1",
+        "name": "New-York"
+      },
+      {
+        "id": "2",
+        "name": "Washington"
+      },
+      {
+        "id": "3",
+        "name": "Detroit"
+      },
+      {
+        "id": "4",
+        "name": "Anchorage"
+      }
+    ]
+  },
+  {
+    "id": "4",
+    "name": "China",
+    "leaderIconId": "ChinaIcon.png",
+    "cities": [
+      {
+        "id": "1",
+        "name": "Beijing"
+      },
+      {
+        "id": "2",
+        "name": "Shanghai"
+      },
+      {
+        "id": "3",
+        "name": "Chongqing"
+      },
+      {
+        "id": "4",
+        "name": "Guangzhou"
+      }
+    ]
+  }
+]

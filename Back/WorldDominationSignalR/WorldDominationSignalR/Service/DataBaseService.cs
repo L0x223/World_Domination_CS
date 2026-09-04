@@ -11,19 +11,8 @@ public class DataBaseService : IDataBaseService
     {
         _dbContext = dbContext;
     }
-    
-    public Task<Player?> GetByNickname(string nickname)
-    {
-        throw new NotImplementedException();
-    }
 
-    public Task<bool> NicknameExistsAsync(string nickname)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task AddPlayerAsync(Player player)
-    {
-        throw new NotImplementedException();
-    }
+    public Task<Player?> GetByNickname(string nickname) => throw new NotImplementedException();
+    public Task<bool> NicknameExistsAsync(string nickname) => throw new NotImplementedException();
+    public Task AddPlayerAsync(Player player) => throw new NotImplementedException();
 }
