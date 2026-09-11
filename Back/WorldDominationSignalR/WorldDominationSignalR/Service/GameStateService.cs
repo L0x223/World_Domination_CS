@@ -16,7 +16,7 @@ public class GameStateService : IGameStateService
     {
         _countryDataService = countryDataService;
     }
-    public SessionGameState CreateSessionState(string sessionId, string joinCode)
+    public SessionGameState CreateSessionState(string sessionId, string joinCode, bool isPrivate = false)//isPrivate for future use
     {
         var state = new SessionGameState { SessionId = sessionId, JoinCode = joinCode };
         _sessions[sessionId] = state;
@@ -90,6 +90,28 @@ public class GameStateService : IGameStateService
         }
     }
 
+    public IEnumerable<SessionDto> GetSessions(string filter = "", bool excludeFullSessions = false)
+    {
+        return _sessions.Values
+            .Where(s => s.Phase == GamePhase.Lobby)
+            .Where(s => string.IsNullOrEmpty(filter) ||
+                        s.SessionId.Contains(filter, StringComparison.OrdinalIgnoreCase))
+            .Where(s => !excludeFullSessions || s.PlayersById.Count < SessionGameState.MaxPlayers)
+            .Select(s => new SessionDto
+            {
+                SessionName = s.SessionId,
+                PlayerCount = s.PlayersById.Count,
+                MaxPlayers = SessionGameState.MaxPlayers,
+                Phase = s.Phase
+            })
+            .ToList();
+    }
+
+    public string? GetJoinCodeById(string sessionId)
+    {
+        return _sessions.TryGetValue(sessionId, out var state) ? state.JoinCode : null;
+    }
+
     public void RemoveGameState(string sessionId)
     {
         if (_sessions.TryRemove(sessionId, out var state))
@@ -125,5 +147,5 @@ public class GameStateService : IGameStateService
         }
     }
     
-
+    
 }

@@ -70,27 +70,6 @@ public class WdGameHub : Hub
         return players; 
     }
     
-    public async Task<JoinSessionResult> JoinSessionByCode(string code, string nickname)
-    {
-        var state = _gameState.GetGameStateByJoinCode(code.ToUpperInvariant());
-        if (state is null)
-            return new JoinSessionResult { Success = false, Error = "SessionNotFound" };
-
-        if (state.Phase != GamePhase.Lobby)
-            return new JoinSessionResult { Success = false, Error = "SessionAlreadyStarted" };
-
-        var player = await _db.GetByNickname(nickname);
-        if (player is null)
-            return new JoinSessionResult { Success = false, Error = "PlayerNotFound" };
-
-        if (!_gameState.TryAddPlayer(state.SessionId, Context.ConnectionId, player))
-            return new JoinSessionResult { Success = false, Error = "SessionFull" };
-
-        await Groups.AddToGroupAsync(Context.ConnectionId, state.SessionId);
-        await BroadcastLobbyPlayers(state.SessionId);
-
-        return new JoinSessionResult { Success = true, SessionId = state.SessionId };
-    }
     private static string GenerateJoinCode(int length = 4)
     {
         return new string(Enumerable.Range(0, length)
@@ -131,5 +110,49 @@ public class WdGameHub : Hub
     {
         var players = _gameState.GetLobbyPlayers(sessionId);
         await Clients.Group(sessionId).SendAsync("PlayersUpdated", players);
+    }
+    
+    public IEnumerable<SessionDto> GetSessions(string filter = "", bool excludeFullSessions = false)
+    {
+        return _gameState.GetSessions(filter, excludeFullSessions);
+    }
+    
+    private async Task<JoinSessionResult> JoinSessionInternal(SessionGameState state, string nickname)
+    {
+        if (state.Phase != GamePhase.Lobby)
+            return new JoinSessionResult { Success = false, Error = "SessionAlreadyStarted" };
+
+        var player = await _db.GetByNickname(nickname);
+        if (player is null)
+            return new JoinSessionResult { Success = false, Error = "PlayerNotFound" };
+
+        if (!_gameState.TryAddPlayer(state.SessionId, Context.ConnectionId, player))
+            return new JoinSessionResult { Success = false, Error = "SessionFull" };
+
+        await Groups.AddToGroupAsync(Context.ConnectionId, state.SessionId);
+        await BroadcastLobbyPlayers(state.SessionId);
+
+        return new JoinSessionResult { Success = true, SessionId = state.SessionId };
+    }
+
+    public async Task<JoinSessionResult> JoinSessionByCode(string code, string nickname)
+    {
+        var state = _gameState.GetGameStateByJoinCode(code.ToUpperInvariant());
+        return state is null
+            ? new JoinSessionResult { Success = false, Error = "SessionNotFound" }
+            : await JoinSessionInternal(state, nickname);
+    }
+
+    public async Task<JoinSessionResult> JoinSessionById(string sessionId, string nickname)
+    {
+        var state = _gameState.GetGameState(sessionId);
+        return state is null
+            ? new JoinSessionResult { Success = false, Error = "SessionNotFound" }
+            : await JoinSessionInternal(state, nickname);
+    }
+
+    public string? GetJoinCodeById(string sessionId)
+    {
+        return _gameState.GetJoinCodeById(sessionId);
     }
 }

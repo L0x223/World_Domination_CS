@@ -3,6 +3,7 @@ import PlayerInLobbyElement from './PlayerInLobbyElement.vue';
 import {LobbyState} from '@/states/lobby'
 const props = defineProps({
     players: Array,
+    joinCode: String
 }
 )
 </script>
@@ -10,6 +11,7 @@ const props = defineProps({
 <template>
     <div class="player-in-lobby-container">
     <h1>Players in lobby: {{ props.players.length }}</h1>
+    <p>Join code: {{ props.joinCode }}</p>
     <div>
         <PlayerInLobbyElement
             v-for="p in props.players"

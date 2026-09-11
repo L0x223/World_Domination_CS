@@ -2,7 +2,7 @@
 import ChooseCountryInLobbyModal from '@/components/ChooseCountryInLobbyModal.vue'
 import PlayerInLobbyContainer from '@/components/PlayerInLobbyContainer.vue'
 import { ref, onMounted } from 'vue'
-import { onPlayersUpdated, getAllCountries, getPlayersInLobby, rejoinSession, getAvailableCountries, selectCountry } from '@/server/RequstHandlers'
+import { onPlayersUpdated, getAllCountries, getPlayersInLobby, rejoinSession, getAvailableCountries, selectCountry, getJoinCodeById } from '@/server/RequstHandlers'
 import { connection } from '@/server/connection'
 import { LobbyState } from '@/states/lobby'
 import {SessionState} from '@/states/session'
@@ -11,6 +11,7 @@ import { Player } from '@/states/player'
 const ChooseCountryInLobbyShow = ref(true)
 const countries = ref([])
 const players = ref([])
+const joinCode = ref()
 
   async function handleChooseCountryInLobby(country) {
   if (country !== "") {
@@ -58,7 +59,7 @@ onMounted(async () => {
     }
   }
   onPlayersUpdated(handlePlayersUpdated)
-
+  joinCode.value = await getJoinCodeById(SessionState.sessionId)
   countries.value = await getAvailableCountries(SessionState.sessionId)
   players.value = await getPlayersInLobby(SessionState.sessionId)
 })
@@ -67,7 +68,7 @@ onMounted(async () => {
 </script>
 <template>
   <h1></h1>
-    <PlayerInLobbyContainer :players = "players"/>
+    <PlayerInLobbyContainer :players = "players" :joinCode="joinCode"/>
     <ChooseCountryInLobbyModal :show="ChooseCountryInLobbyShow"
       :countries="countries"
       @continue="handleChooseCountryInLobby"></ChooseCountryInLobbyModal>

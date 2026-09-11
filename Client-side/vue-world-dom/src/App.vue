@@ -1,21 +1,16 @@
-  <script setup lang="ts">
-  import * as signalR from "@microsoft/signalr";
-  import { connection } from "./server/connection";
-  import { currentView } from "./router";
-  import { registerHandlers } from "./server/MessageHandler";
+<script setup lang="ts">
+import { currentView } from "./router";
+import { registerHandlers } from "./server/MessageHandler";
+import { connectionReady } from "./server/connection";
 
+registerHandlers();
 
-  registerHandlers();
+connectionReady
+  .then(() => console.log("Connected to SignalR hub"));
+</script>
 
-  connection
-      .start()
-      .then(() => console.log("Connected to SignalR hub"))
-      .catch((err) => {
-        console.error("SignalR connection error:", err);
-      });
-  </script>
 <template>
   <component :is="currentView" />
 </template>
 
-  <style scoped></style>
+<style scoped></style>

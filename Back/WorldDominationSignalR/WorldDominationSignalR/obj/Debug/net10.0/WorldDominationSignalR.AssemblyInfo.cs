@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("WorldDominationSignalR")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+94c43f0ef06d80d3767205b10dd97e27a2641495")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+326256b490d7693e1d3c3475e9c19280752e5ddd")]
 [assembly: System.Reflection.AssemblyProductAttribute("WorldDominationSignalR")]
 [assembly: System.Reflection.AssemblyTitleAttribute("WorldDominationSignalR")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

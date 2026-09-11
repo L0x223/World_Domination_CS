@@ -1,6 +1,7 @@
-import { connection } from './connection'
+import { connection, connectionReady } from './connection'
 import type { Country } from '../objects/country.ts'
-import type { PlayerInterface } from '@/objects/player'
+import type { PlayerDto } from '@/objects/player'
+import type { SessionDto } from '@/objects/SessionDto'
 
 export async function isNickAvailable(nickname: string) {
     const isAvailable = await connection.invoke<boolean>("CheckNickAvailability", nickname)
@@ -30,9 +31,9 @@ export async function getAllCountries(): Promise<Country[]> {
     return countries
 }
 
-export async function getPlayersInLobby(sessionId: string): Promise<PlayerInterface[]> {
+export async function getPlayersInLobby(sessionId: string): Promise<PlayerDto[]> {
 
-    const players = await connection.invoke<PlayerInterface[]>("GetPlayersInLobby", sessionId)
+    const players = await connection.invoke<PlayerDto[]>("GetPlayersInLobby", sessionId)
     return players
 }
 
@@ -58,10 +59,23 @@ export async function selectCountry(sessionId: string, playerId: string, country
   return await connection.invoke<boolean>("SelectCountry", sessionId, playerId, countryId)
 }
 
-export function onPlayersUpdated(callback: (players: PlayerInterface[]) => void) {
+export function onPlayersUpdated(callback: (players: PlayerDto[]) => void) {
   connection.on("PlayersUpdated", callback)
 }
 
-export function offPlayersUpdated(callback: (players: PlayerInterface[]) => void) {
+export function offPlayersUpdated(callback: (players: PlayerDto[]) => void) {
   connection.off("PlayersUpdated", callback)
+}
+
+export async function getSessions(filter: string = '', excludeFullSessions: boolean = false): Promise<SessionDto[]> {
+  await connectionReady
+  return await connection.invoke<SessionDto[]>("GetSessions", filter, excludeFullSessions)
+}
+
+export async function joinSessionById(sessionId: string, nickname: string): Promise<{ success: boolean; sessionId?: string; reason?: string }> {
+  return await connection.invoke("JoinSessionById", sessionId, nickname)
+}
+
+export async function getJoinCodeById(sessionId: string): Promise<string | null> {
+  return await connection.invoke<string | null>("GetJoinCodeById", sessionId)
 }

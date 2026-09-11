@@ -38,8 +38,7 @@ async function onCreateClick() {
       sessionName: sessionName.value
     })
   } else {
-    console.error('Created session but failed to join it:', joinResult.reason)
-    // decide how to surface this - unlikely path but shouldn't be silent
+    console.error('Created session but failed to join it:', joinResult.error)
   }
 }
 </script>

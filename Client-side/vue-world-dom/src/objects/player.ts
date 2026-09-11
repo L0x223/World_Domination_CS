@@ -1,4 +1,4 @@
-export interface PlayerInterface {
+export interface PlayerDto {
     connectionId: string
     nickname: string
     countryId: string | null

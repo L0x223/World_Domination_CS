@@ -5,9 +5,9 @@ const STORAGE_KEY = 'wd-player-state'
 function loadInitial() {
   try {
     const raw = sessionStorage.getItem(STORAGE_KEY)
-    return raw ? JSON.parse(raw) : { id: null, nick: '' }
+    return raw ? JSON.parse(raw) : { id: null, nick: '', registeredNick: null }
   } catch {
-    return { id: null, nick: '' }
+    return { id: null, nick: '', registeredNick: null }
   }
 }
 

@@ -1,14 +1,17 @@
   <script setup>
   import { Player } from '@/states/player';
   import { ref } from 'vue';
-  import { isNickAvailable, addPlayerNickToDb, joinSessionByCode } from '@/server/RequstHandlers';
+  import { isNickAvailable, addPlayerNickToDb, joinSessionByCode, joinSessionById } from '@/server/RequstHandlers';
   import CreateSessionModal from '@/components/CreateSessionModal.vue';
   import { SessionState } from '@/states/session';
   import { LobbyState } from '@/states/lobby';
+  import SearchSessionModal from '@/components/SearchSessionModal.vue';
 
-  let createSessionShowModal = ref(false)
-  let sessionNameTaken = ref(false)
-  let nickIsTaken = ref(false)
+  const createSessionShowModal = ref(false)
+  const searchSessionShowModal = ref(false)
+  const sessionNameTaken = ref(false)
+  const nickIsTaken = ref(false)
+  const localNick = ref(Player.nick)
 
   function handleCreateSession({ sessionId, joinCode, sessionName }) {
     createSessionShowModal.value = false
@@ -17,18 +20,24 @@
     window.location.hash = '/lobby'          
   }
 
+  function handleJoinSession(sessionId) {
+    searchSessionShowModal.value = false
+    processSessionJoin(sessionId)
+    SessionState.justJoined = true
+    window.location.hash = '/lobby'
+  }
+  async function checkNickAvailability() {
+    const nick = localNick.value.trim()
+    Player.nick = nick
 
-  async function checkNickAvailability(e) {
-    
-    let nick = e.target.value.trim();
-    const available =  await isNickAvailable(nick)
-
-    if (available) {
+    if (nick === '') {
       nickIsTaken.value = false
-      Player.nick = nick
-    } else {
-      nickIsTaken.value = true
+      return
     }
+
+    const available = await isNickAvailable(nick)
+    if (localNick.value.trim() !== nick) return
+    nickIsTaken.value = !available
   }
 
   async function addPlayerNick(e) {
@@ -42,16 +51,46 @@
     nickIsTaken.value = true
   }
 }
-  async function changeCreateSessionShowModal() {
-      await addPlayerNick();
-      console.log("Nick is taken:", nickIsTaken.value)
-      if (!nickIsTaken.value) {
-        createSessionShowModal.value = true
-      }
-      else {
-        console.log("Nick is taken, cannot create modal")
-      }
+
+async function ensureNickRegistered() {
+  const nick = Player.nick
+
+  if (!nick) {
+    nickIsTaken.value = true
+    return false
   }
+
+  if (Player.id && Player.registeredNick === nick) {
+    nickIsTaken.value = false
+    return true
+  }
+
+  const result = await addPlayerNickToDb(nick)
+  if (result.success) {
+    Player.id = result.playerId
+    Player.registeredNick = nick
+    nickIsTaken.value = false
+    return true
+  } else {
+    nickIsTaken.value = true
+    return false
+  }
+}
+async function changeCreateSessionShowModal() {
+  if (await ensureNickRegistered()) {
+    createSessionShowModal.value = true
+  } else {
+    console.log("Nick is taken, cannot create modal")
+  }
+}
+
+async function changeSearchSessionShowModal() {
+  if (await ensureNickRegistered()) {
+    searchSessionShowModal.value = true
+  } else {
+    console.log("Nick is taken, cannot search session")
+  }
+}
 
   async function processSessionCreation(sessionId, joinCode, sessionName) {
     SessionState.sessionId = sessionId
@@ -65,6 +104,17 @@
       console.error('Failed to join own session:', result.reason)
     }
   }
+  
+  async function processSessionJoin(sessionId) {
+    SessionState.sessionId = sessionId
+
+    const result = await joinSessionById(sessionId, Player.nick)
+    if (result.success) {
+      SessionState.justJoined = true
+    } else {
+      console.error('Failed to join session:', result.reason)
+    }
+  }
 </script>
 
   <template>
@@ -73,13 +123,13 @@
       
       <div class="form-row">
         <label>your Nick:</label>
-        <input @input="checkNickAvailability" placeholder="enter here" class="input" />
+        <input v-model="localNick" @input="checkNickAvailability" placeholder="enter here" class="input" />
       </div>
 
       <p v-if="nickIsTaken" class="error">This nick is already taken</p>  
 
       <div class="buttons">
-        <button @click="" :disabled="nickIsTaken">Join session</button>
+        <button @click="changeSearchSessionShowModal" :disabled="nickIsTaken">Search session</button>
         <button @click="changeCreateSessionShowModal" :disabled="nickIsTaken">Create session</button>
       </div>
     </div>
@@ -89,6 +139,10 @@
      @close="createSessionShowModal = false" 
      @createSession="handleCreateSession"
      ></CreateSessionModal>
+    <SearchSessionModal :show="searchSessionShowModal"
+    @joinSession="handleJoinSession"
+    @close="searchSessionShowModal = false"
+     />
   
   </template>
 
