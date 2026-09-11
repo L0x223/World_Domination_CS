@@ -8,8 +8,9 @@ public class SessionGameState
     public string JoinCode { get; set; }
     public const int MaxPlayers = 4;
 
-    public Dictionary<string, Player> PlayersByConnectionId { get; set; } = new();
-    public Dictionary<string, string> CountryByPlayerId { get; set; } = new();
+    public Dictionary<string, Player> PlayersById { get; set; } = new();       // playerId -> Player
+    public Dictionary<string, string> ConnectionIdByPlayerId { get; set; } = new(); // playerId -> current connectionId
+    public Dictionary<string, string> CountryByPlayerId { get; set; } = new(); // playerId -> countryId
     public GamePhase Phase { get; set; } = GamePhase.Lobby;
 }
 public enum GamePhase { Lobby, CountrySelection, InProgress, Finished }

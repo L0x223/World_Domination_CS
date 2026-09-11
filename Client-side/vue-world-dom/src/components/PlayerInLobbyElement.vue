@@ -1,20 +1,31 @@
 <script setup>
+import { computed } from 'vue'
 
 const props = defineProps(
     {
-        avatar: String,
-        nickName: String,
-        countryName: String,
-        isSelected: Boolean,
-        isHost: Boolean,
+      nickName: String,
+      countryName: String,
+      countryLeaderIconId: String,
+      isSelected: Boolean,
     }
 )
+
+const icons = import.meta.glob('@/assets/img/*.png', { eager: true, import: 'default' })
+
+const iconSrc = computed(() => {
+  const filename = props.countryLeaderIconId ?? 'NoneIcon.png'
+  const match = Object.entries(icons).find(([path]) => path.endsWith(filename))
+  return match ? match[1] : icons['/src/assets/img/NoneIcon.png']
+})
+
+console.log('countryLeaderIconId prop:', props.countryLeaderIconId)
+console.log('icons object:', icons)
 
 </script>
 
 <template>
   <div class="player-lobby">
-    <img class="avatar" :src="props.avatar" alt="avatar" width="48" height="48"/>
+    <img class="avatar" :src="iconSrc" alt="avatar" width="48" height="48"/>
 
     <div class="info">
       <p class="nick">{{ props.nickName }}</p>

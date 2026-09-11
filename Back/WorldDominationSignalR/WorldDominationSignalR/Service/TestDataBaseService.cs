@@ -10,9 +10,9 @@ public class TestDataBaseService : IDataBaseService
     {
         Players = new List<Player>()
         {
-            new Player() { Nickname = "Lox223" },
-            new Player() { Nickname = "BorisJonson" },
-            new Player() { Nickname = "Lalka223" },
+            new Player() { Id = "1", Nickname = "Lox223" },
+            new Player() { Id = "2",Nickname = "BorisJonson" },
+            new Player() { Id = "3",Nickname = "Lalka223" },
         };
     }
 
@@ -30,7 +30,14 @@ public class TestDataBaseService : IDataBaseService
 
     public Task AddPlayerAsync(Player player)
     {
+        player.Id = Guid.NewGuid().ToString();
         Players.Add(player);
         return Task.CompletedTask;
+    }
+
+    public async Task<Player?> GetById(string id)
+    {
+        var player = Players.FirstOrDefault(p => p.Id == id);
+        return player;
     }
 }

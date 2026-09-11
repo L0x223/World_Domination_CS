@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using WorldDominationSignalR.DTOs;
 using WorldDominationSignalR.Entites;
 using WorldDominationSignalR.States;
 
@@ -39,28 +40,25 @@ public class GameStateService : IGameStateService
     }
     
 
-    public bool TryAddPlayer(string sessionId, string connectionId, Player player)
+    public bool TryAddPlayer(string sessionId, string playerId, Player player)
     {
         var state = GetGameState(sessionId);
         if (state is null) return false;
 
         lock (state)
         {
-            if (state.PlayersByConnectionId.Count >= SessionGameState.MaxPlayers) return false;
-            if (state.PlayersByConnectionId.ContainsKey(connectionId)) return true;
-            state.PlayersByConnectionId[connectionId] = player;
+            if (state.PlayersById.ContainsKey(player.Id))
+            {
+                // Same player reconnecting just update their connection
+                state.ConnectionIdByPlayerId[player.Id] = playerId;
+                return true;
+            }
+
+            if (state.PlayersById.Count >= SessionGameState.MaxPlayers) return false;
+
+            state.PlayersById[player.Id] = player;
+            state.ConnectionIdByPlayerId[player.Id] = playerId;
             return true;
-        }
-    }
-
-    public IEnumerable<Player> GetPlayersInLobby(string sessionId)
-    {
-        var state = GetGameState(sessionId);
-        if (state is null) return Enumerable.Empty<Player>();
-
-        lock (state)
-        {
-            return state.PlayersByConnectionId.Values.ToList();
         }
     }
     
@@ -97,4 +95,35 @@ public class GameStateService : IGameStateService
         if (_sessions.TryRemove(sessionId, out var state))
             _sessionIdByJoinCode.TryRemove(state.JoinCode, out _);
     }
+    
+    public IEnumerable<PlayerLobbyDto> GetLobbyPlayers(string sessionId)
+    {
+        var state = GetGameState(sessionId);
+        if (state is null) return Enumerable.Empty<PlayerLobbyDto>();
+
+        var allCountries = _countryDataService.GetAll();
+
+        lock (state)
+        {
+            return state.PlayersById.Select(kvp =>
+            {
+                var playerId = kvp.Key;
+                var player = kvp.Value;
+                state.CountryByPlayerId.TryGetValue(playerId, out var countryId);
+                var country = countryId is null ? null : allCountries.FirstOrDefault(c => c.Id == countryId);
+                state.ConnectionIdByPlayerId.TryGetValue(playerId, out var connectionId);
+
+                return new PlayerLobbyDto
+                {
+                    ConnectionId = connectionId,
+                    Nickname = player.Nickname,
+                    CountryId = countryId,
+                    CountryName = country?.Name,
+                    CountryLeaderIconId =  country?.LeaderIconId,
+                };
+            }).ToList();
+        }
+    }
+    
+
 }

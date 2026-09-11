@@ -13,6 +13,7 @@
   function handleCreateSession({ sessionId, joinCode, sessionName }) {
     createSessionShowModal.value = false
     processSessionCreation(sessionId, joinCode, sessionName)
+    console.log("Session created with id: " + sessionId)
     window.location.hash = '/lobby'          
   }
 
@@ -31,16 +32,19 @@
   }
 
   async function addPlayerNick(e) {
-      let isOkay = await addPlayerNickToDb(Player.nick)
-      if (isOkay) {
-        console.log("Nick added to database successfully")
-      } else {
-        nickIsTaken.value = true
-      }
+  console.log("Attempting to add nick:", JSON.stringify(Player.nick))
+  const result = await addPlayerNickToDb(Player.nick)
+  console.log("Result from addPlayerNickToDb:", result)
+  if (result.success) {
+    Player.id = result.playerId
+    console.log("Nick added to database successfully, id:", Player.id)
+  } else {
+    nickIsTaken.value = true
   }
-
+}
   async function changeCreateSessionShowModal() {
       await addPlayerNick();
+      console.log("Nick is taken:", nickIsTaken.value)
       if (!nickIsTaken.value) {
         createSessionShowModal.value = true
       }
@@ -49,13 +53,17 @@
       }
   }
 
-  function processSessionCreation(sessionId, joinCode, sessionName) {
+  async function processSessionCreation(sessionId, joinCode, sessionName) {
     SessionState.sessionId = sessionId
     SessionState.joinCode = joinCode
     SessionState.sessionName = sessionName
-    joinSessionByCode(joinCode, Player.nick)
-    console.log("Session created with name: " + sessionName)
-    //TODO HANDLE ALL CONSEQUENCES OF SESSION CREATION
+
+    const result = await joinSessionByCode(joinCode, Player.nick)
+    if (result.success) {
+      SessionState.justJoined = true
+    } else {
+      console.error('Failed to join own session:', result.reason)
+    }
   }
 </script>
 

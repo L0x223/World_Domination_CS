@@ -15,4 +15,8 @@ public class DataBaseService : IDataBaseService
     public Task<Player?> GetByNickname(string nickname) => throw new NotImplementedException();
     public Task<bool> NicknameExistsAsync(string nickname) => throw new NotImplementedException();
     public Task AddPlayerAsync(Player player) => throw new NotImplementedException();
+    public Task<Player?> GetById(string id)
+    {
+        throw new NotImplementedException();
+    }
 }

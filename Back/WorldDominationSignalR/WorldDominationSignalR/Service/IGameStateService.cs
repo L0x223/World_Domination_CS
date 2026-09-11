@@ -1,3 +1,4 @@
+using WorldDominationSignalR.DTOs;
 using WorldDominationSignalR.Entites;
 using WorldDominationSignalR.States;
 
@@ -11,8 +12,9 @@ public interface IGameStateService
     SessionGameState? GetGameStateByJoinCode(string joinCode);
     IEnumerable<Country> GetAvailableCountries(string sessionId);
     IEnumerable<Country> GetAllCountries();
-    IEnumerable<Player> GetPlayersInLobby(string sessionId);
     public bool TryAddPlayer(string sessionId, string playerId, Player player);
+    public IEnumerable<PlayerLobbyDto> GetLobbyPlayers(string sessionId);
+    public bool TrySelectCountry(string sessionId, string playerId, string countryId);
 
     void RemoveGameState(string sessionId);
 }

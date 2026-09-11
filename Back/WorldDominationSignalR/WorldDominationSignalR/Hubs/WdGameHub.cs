@@ -1,5 +1,6 @@
-﻿using System.Net;
+﻿
 using Microsoft.AspNetCore.SignalR;
+using WorldDominationSignalR.DTOs;
 using WorldDominationSignalR.Entites;
 using WorldDominationSignalR.Results;
 using WorldDominationSignalR.Service;
@@ -27,15 +28,16 @@ public class WdGameHub : Hub
         return player is null;
     }
 
-    public async Task<HttpStatusCode> AddPlayerToDatabase(string nickname)
+    public async Task<AddPlayerResult> AddPlayerToDatabase(string nickname)
     {
         bool isTaken = await _db.NicknameExistsAsync(nickname);
-        if (isTaken) return HttpStatusCode.Conflict;
+        if (isTaken)
+            return new AddPlayerResult { Success = false, Error = "NicknameTaken" };
 
         var player = new Player { Nickname = nickname };
         await _db.AddPlayerAsync(player);
 
-        return HttpStatusCode.Created;
+        return new AddPlayerResult { Success = true, PlayerId = player.Id };
     }
 
     public bool CheckSessionNameAvailability(string sessionName)
@@ -56,15 +58,15 @@ public class WdGameHub : Hub
         return new CreateSessionResult { Success = true, JoinCode = joinCode };
     }
 
-    public async Task<IEnumerable<Country>> GetAllCountries()
+    public IEnumerable<Country> GetAllCountries()
     {
         var countries = _gameState.GetAllCountries();
         return countries;
     }
 
-    public async Task<IEnumerable<Player>> GetPlayersInLobby(string sessionId)
+    public IEnumerable<PlayerLobbyDto> GetPlayersInLobby(string sessionId)
     {
-        var players = _gameState.GetPlayersInLobby(sessionId);
+        var players = _gameState.GetLobbyPlayers(sessionId);
         return players; 
     }
     
@@ -85,7 +87,7 @@ public class WdGameHub : Hub
             return new JoinSessionResult { Success = false, Error = "SessionFull" };
 
         await Groups.AddToGroupAsync(Context.ConnectionId, state.SessionId);
-        await Clients.Group(state.SessionId).SendAsync("PlayerJoined", nickname);
+        await BroadcastLobbyPlayers(state.SessionId);
 
         return new JoinSessionResult { Success = true, SessionId = state.SessionId };
     }
@@ -94,5 +96,40 @@ public class WdGameHub : Hub
         return new string(Enumerable.Range(0, length)
             .Select(_ => CodeAlphabet[Rng.Next(CodeAlphabet.Length)])
             .ToArray());
+    }
+    public async Task<JoinSessionResult> RejoinSession(string sessionId, string playerId)
+    {
+        var state = _gameState.GetGameState(sessionId);
+        if (state is null)
+            return new JoinSessionResult { Success = false, Error = "SessionNotFound" };
+    
+        var player = await _db.GetById(playerId); 
+        if (player is null)
+            return new JoinSessionResult { Success = false, Error = "PlayerNotFound" };
+
+        if (!_gameState.TryAddPlayer(state.SessionId, Context.ConnectionId, player))
+            return new JoinSessionResult { Success = false, Error = "SessionFull" };
+
+        await Groups.AddToGroupAsync(Context.ConnectionId, state.SessionId);  
+        return new JoinSessionResult { Success = true, SessionId = state.SessionId };
+    }
+    public async Task<bool> SelectCountry(string sessionId, string playerId, string countryId)
+    {
+        var success = _gameState.TrySelectCountry(sessionId, playerId, countryId);
+        if (success)
+            await BroadcastLobbyPlayers(sessionId);
+
+        return success;
+    }
+    
+    public IEnumerable<Country> GetAvailableCountries(string sessionId)
+    {
+        return _gameState.GetAvailableCountries(sessionId);
+    }
+    
+    private async Task BroadcastLobbyPlayers(string sessionId)
+    {
+        var players = _gameState.GetLobbyPlayers(sessionId);
+        await Clients.Group(sessionId).SendAsync("PlayersUpdated", players);
     }
 }
