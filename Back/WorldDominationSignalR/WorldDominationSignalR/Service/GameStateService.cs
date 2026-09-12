@@ -51,6 +51,7 @@ public class GameStateService : IGameStateService
             {
                 // Same player reconnecting just update their connection
                 state.ConnectionIdByPlayerId[player.Id] = playerId;
+                CancelDisconnectTimerLocked(state, player.Id); 
                 return true;
             }
 
@@ -61,8 +62,27 @@ public class GameStateService : IGameStateService
             return true;
         }
     }
-    
+    public void CancelDisconnectTimer(string sessionId, string playerId)
+    {
+        var state = GetGameState(sessionId);
+        if (state is null) return;
 
+        lock (state)
+        {
+            CancelDisconnectTimerLocked(state, playerId);
+        }
+    }
+
+    // Assumes caller already holds lock (state)
+    private void CancelDisconnectTimerLocked(SessionGameState state, string playerId)
+    {
+        if (state.DisconnectTimers.TryGetValue(playerId, out var cts))
+        {
+            cts.Cancel();
+            state.DisconnectTimers.Remove(playerId);
+        }
+    }
+    
     public IEnumerable<Country> GetAllCountries()
     {
         return  _countryDataService.GetAll();
@@ -142,10 +162,101 @@ public class GameStateService : IGameStateService
                     CountryId = countryId,
                     CountryName = country?.Name,
                     CountryLeaderIconId =  country?.LeaderIconId,
+                    IsReady = state.ReadyPlayerIds.Contains(playerId),
                 };
             }).ToList();
         }
-    }
+        
     
+    }
+    //disconect
+    public string? GetSessionIdByConnectionId(string connectionId)
+    {
+        foreach (var state in _sessions.Values)
+        {
+            lock (state)
+            {
+                if (state.ConnectionIdByPlayerId.Values.Contains(connectionId))
+                    return state.SessionId;
+            }
+        }
+        return null;
+    }
+
+    public string? GetPlayerIdByConnectionId(string sessionId, string connectionId)
+    {
+        var state = GetGameState(sessionId);
+        if (state is null) return null;
+
+        lock (state)
+        {
+            return state.ConnectionIdByPlayerId
+                .FirstOrDefault(kvp => kvp.Value == connectionId).Key;
+        }
+    }
+
+    public void MarkPlayerDisconnected(string sessionId, string playerId, Action onGracePeriodExpired)
+    {
+        var state = GetGameState(sessionId);
+        if (state is null) return;
+
+        lock (state)
+        {
+            var cts = new CancellationTokenSource();
+            state.DisconnectTimers[playerId] = cts;
+
+            _ = Task.Delay(TimeSpan.FromSeconds(120), cts.Token).ContinueWith(t =>
+            {
+                if (!t.IsCanceled)
+                {
+                    RemovePlayer(sessionId, playerId);
+                    onGracePeriodExpired();
+                }
+            }, TaskScheduler.Default);
+        }
+    }
+
+    public void RemovePlayer(string sessionId, string playerId)
+    {
+        var state = GetGameState(sessionId);
+        if (state is null) return;
+
+        lock (state)
+        {
+            state.PlayersById.Remove(playerId);
+            state.ConnectionIdByPlayerId.Remove(playerId);
+            state.CountryByPlayerId.Remove(playerId);
+            state.DisconnectTimers.Remove(playerId);
+        }
+    }
+    //
+    
+    public bool TrySetReady(string sessionId, string playerId, bool isReady)
+    {
+        var state = GetGameState(sessionId);
+        if (state is null) return false;
+
+        lock (state)
+        {
+            if (!state.PlayersById.ContainsKey(playerId)) return false;
+
+            if (isReady) state.ReadyPlayerIds.Add(playerId);
+            else state.ReadyPlayerIds.Remove(playerId);
+
+            return true;
+        }
+    }
+
+    public bool AreAllPlayersReady(string sessionId)
+    {
+        var state = GetGameState(sessionId);
+        if (state is null) return false;
+
+        lock (state)
+        {
+            return state.PlayersById.Count >= SessionGameState.MinPlayers
+                   && state.PlayersById.Keys.All(id => state.ReadyPlayerIds.Contains(id));
+        }
+    }
     
 }

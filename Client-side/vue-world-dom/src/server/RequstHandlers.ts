@@ -79,3 +79,11 @@ export async function joinSessionById(sessionId: string, nickname: string): Prom
 export async function getJoinCodeById(sessionId: string): Promise<string | null> {
   return await connection.invoke<string | null>("GetJoinCodeById", sessionId)
 }
+
+export async function setReady(sessionId: string, playerId: string, isReady: boolean): Promise<boolean> {
+  return await connection.invoke<boolean>("SetReady", sessionId, playerId, isReady)
+}
+
+export function onAllPlayersReady(callback: () => void) {
+  connection.on("AllPlayersReady", callback)
+}

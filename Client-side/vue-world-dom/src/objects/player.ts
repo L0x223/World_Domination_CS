@@ -4,4 +4,5 @@ export interface PlayerDto {
     countryId: string | null
     countryName: string | null
     countryLeaderIconId: string | null
+    isReady: boolean
 }

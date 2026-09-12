@@ -35,6 +35,16 @@ console.log('icons object:', icons)
 </template>
 
 <style scoped>
+.player-lobby {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 280px;    
+  margin-bottom: 8px;
+  padding: 4px 12px;
+  border: 2px solid #000000;
+  border-radius: 1px;
+}
 .selectedCountry {
   color: black;
   font-weight: bold;

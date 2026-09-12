@@ -155,4 +155,36 @@ public class WdGameHub : Hub
     {
         return _gameState.GetJoinCodeById(sessionId);
     }
+    public override async Task OnDisconnectedAsync(Exception? exception)
+    {
+        var sessionId = _gameState.GetSessionIdByConnectionId(Context.ConnectionId);
+        if (sessionId is not null)
+        {
+            var playerId = _gameState.GetPlayerIdByConnectionId(sessionId, Context.ConnectionId);
+            if (playerId is not null)
+            {
+                _gameState.MarkPlayerDisconnected(sessionId, playerId, () =>
+                {
+                    _ = Clients.Group(sessionId).SendAsync("PlayersUpdated", _gameState.GetLobbyPlayers(sessionId));
+                });
+            }
+        }
+
+        await base.OnDisconnectedAsync(exception);
+    }
+    
+    public async Task<bool> SetReady(string sessionId, string playerId, bool isReady)
+    {
+        var success = _gameState.TrySetReady(sessionId, playerId, isReady);
+        if (success)
+        {
+            await Clients.Group(sessionId).SendAsync("PlayersUpdated", _gameState.GetLobbyPlayers(sessionId));
+
+            if (_gameState.AreAllPlayersReady(sessionId))
+            {
+                await Clients.Group(sessionId).SendAsync("AllPlayersReady");
+            }
+        }
+        return success;
+    }
 }

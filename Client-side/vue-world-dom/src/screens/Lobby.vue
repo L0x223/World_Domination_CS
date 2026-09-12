@@ -2,7 +2,7 @@
 import ChooseCountryInLobbyModal from '@/components/ChooseCountryInLobbyModal.vue'
 import PlayerInLobbyContainer from '@/components/PlayerInLobbyContainer.vue'
 import { ref, onMounted } from 'vue'
-import { onPlayersUpdated, getAllCountries, getPlayersInLobby, rejoinSession, getAvailableCountries, selectCountry, getJoinCodeById } from '@/server/RequstHandlers'
+import { onAllPlayersReady, setReady, onPlayersUpdated, getAllCountries, getPlayersInLobby, rejoinSession, getAvailableCountries, selectCountry, getJoinCodeById } from '@/server/RequstHandlers'
 import { connection } from '@/server/connection'
 import { LobbyState } from '@/states/lobby'
 import {SessionState} from '@/states/session'
@@ -12,6 +12,13 @@ const ChooseCountryInLobbyShow = ref(true)
 const countries = ref([])
 const players = ref([])
 const joinCode = ref()
+const isReady = ref(false)
+
+async function toggleReady() {
+  const next = !isReady.value
+  const success = await setReady(SessionState.sessionId, Player.id, next)
+  if (success) isReady.value = next
+}
 
   async function handleChooseCountryInLobby(country) {
   if (country !== "") {
@@ -58,10 +65,25 @@ onMounted(async () => {
       return
     }
   }
+  
   onPlayersUpdated(handlePlayersUpdated)
   joinCode.value = await getJoinCodeById(SessionState.sessionId)
   countries.value = await getAvailableCountries(SessionState.sessionId)
   players.value = await getPlayersInLobby(SessionState.sessionId)
+  const me = players.value.find(p => p.nickname === Player.registeredNick)
+  if (me?.countryId) {
+    LobbyState.selectedCountry = { id: me.countryId, name: me.countryName, leaderIconId: me.countryLeaderIconId }
+    ChooseCountryInLobbyShow.value = false
+  } else {
+    ChooseCountryInLobbyShow.value = true
+  }
+
+  players.value = await getPlayersInLobby(SessionState.sessionId)
+  isReady.value = me?.isReady ?? false
+
+  onAllPlayersReady(() => {
+    window.location.hash = '/game'  // or whatever your game view route is
+  })
 })
 
 
@@ -72,4 +94,7 @@ onMounted(async () => {
     <ChooseCountryInLobbyModal :show="ChooseCountryInLobbyShow"
       :countries="countries"
       @continue="handleChooseCountryInLobby"></ChooseCountryInLobbyModal>
+  <button @click="toggleReady" :disabled="!LobbyState.selectedCountry">
+    {{ isReady ? 'Not ready' : 'Ready' }}
+  </button>
 </template>

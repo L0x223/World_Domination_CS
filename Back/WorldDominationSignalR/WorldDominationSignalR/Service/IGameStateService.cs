@@ -18,4 +18,12 @@ public interface IGameStateService
     public IEnumerable<SessionDto>  GetSessions(string filter = "", bool excludeFullSessions = false);
     public string? GetJoinCodeById(string sessionId);
     void RemoveGameState(string sessionId);
+
+    public string? GetSessionIdByConnectionId(string connectionId);
+    public string? GetPlayerIdByConnectionId(string sessionId, string connectionId);
+    public void MarkPlayerDisconnected(string sessionId, string playerId, Action onGracePeriodExpired);
+    public void CancelDisconnectTimer(string sessionId, string playerId);
+    public void RemovePlayer(string sessionId, string playerId);
+    public bool TrySetReady(string sessionId, string playerId, bool isReady);
+    public bool AreAllPlayersReady(string sessionId);
 }

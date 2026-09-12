@@ -9,18 +9,26 @@ const props = defineProps({
 </script>
 
 <template>
-    <div class="player-in-lobby-container">
-    <h1>Players in lobby: {{ props.players.length }}</h1>
-    <p>Join code: {{ props.joinCode }}</p>
-    <div>
-        <PlayerInLobbyElement
-            v-for="p in props.players"
-            :key="p.connectionId"
-            :nickName="p.nickname"
-            :countryName="p.countryName"
-            :countryLeaderIconId="p.countryLeaderIconId"
-            :isSelected="!!p.countryId"
-            />
-    </div>
+    <div class="payer-in-llobby-container">
+        <h1>Players in lobby: {{ props.players.length }}</h1>
+        <p>Join code: {{ props.joinCode }}</p>
+        <div class="player-list">
+            <PlayerInLobbyElement
+                v-for="p in props.players"
+                :key="p.connectionId"
+                :nickName="p.nickname"
+                :countryName="p.countryName"
+                :countryLeaderIconId="p.countryLeaderIconId"
+                :isSelected="!!p.countryId"
+                />
+        </div>
     </div>
 </template>
+
+<style scoped>
+.player-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+</style>

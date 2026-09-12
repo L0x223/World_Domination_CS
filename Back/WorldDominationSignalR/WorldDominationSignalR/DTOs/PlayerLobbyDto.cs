@@ -7,4 +7,5 @@ public class PlayerLobbyDto
     public string? CountryId { get; set; }
     public string? CountryName { get; set; }
     public string? CountryLeaderIconId { get; set; }
+    public bool IsReady { get; set; }
 }
