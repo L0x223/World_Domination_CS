@@ -1,21 +1,7 @@
 using System.Text.Json;
+using WorldDominationSignalR.Entites;
 
 namespace WorldDominationSignalR.Service;
-public class Country
-{
-    private const int MaxCities = 4;
-    
-    public string Id { get; set; }  
-    public string Name { get; set; } 
-    public string LeaderIconId { get; set; }
-    public List<City> Cities { get; set; } = new List<City>();
-    public class City
-    {
-        public string Id { get; set; }
-        public string Name { get; set; }
-        //there will be stats
-    }
-}
 
 public interface ICountryDataService
 {
@@ -30,8 +16,15 @@ public class CountryDataService : ICountryDataService
     {
         var path = Path.Combine(AppContext.BaseDirectory, "Data", "countries.json");
         var json = File.ReadAllText(path);
-        _countries = JsonSerializer.Deserialize<List<Country>>(json, 
+        _countries = JsonSerializer.Deserialize<List<Country>>(json,
             new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
+
+        foreach (var country in _countries)
+        {
+            if (country.Cities.Count != Country.RequiredCityCount)
+                throw new InvalidOperationException(
+                    $"Country '{country.Id}' must have exactly {Country.RequiredCityCount} cities, has {country.Cities.Count}.");
+        }
     }
 
     public IReadOnlyList<Country> GetAll() => _countries;

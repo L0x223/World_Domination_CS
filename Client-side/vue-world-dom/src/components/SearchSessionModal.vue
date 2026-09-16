@@ -27,7 +27,7 @@ async function handleSelectSession(session) {
     SessionState.justJoined = true
     emit('joinSession', result.sessionId)
   } else {
-    errorMessage.value = result.reason ?? 'Failed to join session'
+    errorMessage.value = result.error ?? 'Failed to join session'
   }
 }
 
@@ -43,7 +43,7 @@ async function handleJoin() {
     SessionState.justJoined = true
     emit('joinSession', result.sessionId)
   } else {
-    errorMessage.value = result.reason ?? 'Failed to join session'
+    errorMessage.value = result.error ?? 'Failed to join session'
   }
 }
 

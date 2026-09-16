@@ -1,93 +1,110 @@
+
 [
   {
-    "id": "1",
+    "id": "BLR",
     "name": "Belarus",
     "leaderIconId": "BelarusIcon.png",
     "cities": [
       {
-        "id": "1",
-        "name": "Minsk"
+        "id": "BLR_MINSK",
+        "name": "Minsk",
+        "startingEconomic": 0.7
       },
       {
-        "id": "2",
-        "name": "Bobruysk"
+        "id": "BLR_BOBRUYSK",
+        "name": "Bobruysk",
+        "startingEconomic": 0.5
       },
       {
-        "id": "3",
-        "name": "Brest"
+        "id": "BLR_BREST",
+        "name": "Brest",
+        "startingEconomic": 0.6
       },
       {
-        "id": "4",
-        "name": "Grodno"
+        "id": "BLR_GRODNO",
+        "name": "Grodno",
+        "startingEconomic": 0.6
       }
     ]
   },
   {
-    "id": "2",
+    "id": "RUS",
     "name": "Russia",
     "leaderIconId": "RussiaIcon.png",
     "cities": [
       {
-        "id": "1",
-        "name": "Moscow"
+        "id": "RUS_MOSCOW",
+        "name": "Moscow",
+        "startingEconomic": 0.8
       },
       {
-        "id": "2",
-        "name": "st. PetersBurg"
+        "id": "RUS_SPB",
+        "name": "St. Petersburg",
+        "startingEconomic": 0.7
       },
       {
-        "id": "3",
-        "name": "Kazan"
+        "id": "RUS_KAZAN",
+        "name": "Kazan",
+        "startingEconomic": 0.6
       },
       {
-        "id": "4",
-        "name": "Grozny"
+        "id": "RUS_GROZNY",
+        "name": "Grozny",
+        "startingEconomic": 0.5
       }
     ]
   },
   {
-    "id": "3",
+    "id": "USA",
     "name": "USA",
     "leaderIconId": "USAIcon.png",
     "cities": [
       {
-        "id": "1",
-        "name": "New-York"
+        "id": "USA_NEWYORK",
+        "name": "New York",
+        "startingEconomic": 0.8
       },
       {
-        "id": "2",
-        "name": "Washington"
+        "id": "USA_WASHINGTON",
+        "name": "Washington",
+        "startingEconomic": 0.7
       },
       {
-        "id": "3",
-        "name": "Detroit"
+        "id": "USA_DETROIT",
+        "name": "Detroit",
+        "startingEconomic": 0.6
       },
       {
-        "id": "4",
-        "name": "Anchorage"
+        "id": "USA_ANCHORAGE",
+        "name": "Anchorage",
+        "startingEconomic": 0.5
       }
     ]
   },
   {
-    "id": "4",
+    "id": "CHN",
     "name": "China",
     "leaderIconId": "ChinaIcon.png",
     "cities": [
       {
-        "id": "1",
-        "name": "Beijing"
+        "id": "CHN_BEIJING",
+        "name": "Beijing",
+        "startingEconomic": 0.8
       },
       {
-        "id": "2",
-        "name": "Shanghai"
+        "id": "CHN_SHANGHAI",
+        "name": "Shanghai",
+        "startingEconomic": 0.7
       },
       {
-        "id": "3",
-        "name": "Chongqing"
+        "id": "CHN_CHONGQING",
+        "name": "Chongqing",
+        "startingEconomic": 0.6
       },
       {
-        "id": "4",
-        "name": "Guangzhou"
+        "id": "CHN_GUANGZHOU",
+        "name": "Guangzhou",
+        "startingEconomic": 0.6
       }
     ]
   }

@@ -40,18 +40,6 @@
     nickIsTaken.value = !available
   }
 
-  async function addPlayerNick(e) {
-  console.log("Attempting to add nick:", JSON.stringify(Player.nick))
-  const result = await addPlayerNickToDb(Player.nick)
-  console.log("Result from addPlayerNickToDb:", result)
-  if (result.success) {
-    Player.id = result.playerId
-    console.log("Nick added to database successfully, id:", Player.id)
-  } else {
-    nickIsTaken.value = true
-  }
-}
-
 async function ensureNickRegistered() {
   const nick = Player.nick
 
@@ -101,7 +89,7 @@ async function changeSearchSessionShowModal() {
     if (result.success) {
       SessionState.justJoined = true
     } else {
-      console.error('Failed to join own session:', result.reason)
+      console.error('Failed to join own session:', result.error)
     }
   }
   
@@ -112,7 +100,7 @@ async function changeSearchSessionShowModal() {
     if (result.success) {
       SessionState.justJoined = true
     } else {
-      console.error('Failed to join session:', result.reason)
+      console.error('Failed to join session:', result.error)
     }
   }
 </script>

@@ -9,6 +9,7 @@ builder.Services.AddSignalR();
 
 builder.Services.AddSingleton<IGameStateService, GameStateService>();
 builder.Services.AddSingleton<ICountryDataService, CountryDataService>();
+builder.Services.AddScoped<IGameRoundService, GameRoundService>();
 
 
 var useTestDb = builder.Configuration.GetValue<bool>("UseTestDatabase");

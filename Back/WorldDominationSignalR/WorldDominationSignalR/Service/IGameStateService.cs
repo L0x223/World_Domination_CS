@@ -14,6 +14,7 @@ public interface IGameStateService
     IEnumerable<Country> GetAllCountries();
     public bool TryAddPlayer(string sessionId, string playerId, Player player);
     public IEnumerable<PlayerLobbyDto> GetLobbyPlayers(string sessionId);
+    public string? GetCountryByPlayerId(string sessionId, string playerId);
     public bool TrySelectCountry(string sessionId, string playerId, string countryId);
     public IEnumerable<SessionDto>  GetSessions(string filter = "", bool excludeFullSessions = false);
     public string? GetJoinCodeById(string sessionId);

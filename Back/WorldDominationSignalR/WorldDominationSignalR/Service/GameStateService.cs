@@ -97,6 +97,19 @@ public class GameStateService : IGameStateService
         return _countryDataService.GetAll().Where(c => !taken.Contains(c.Id));
     }
 
+    public string? GetCountryByPlayerId(string sessionId, string playerId)
+    {
+        var state = GetGameState(sessionId);
+        if (state is null) return null;
+
+        var allCountries = _countryDataService.GetAll();
+
+        lock (state)
+        {
+            return state.CountryByPlayerId[playerId];
+        }
+    }
+
     public bool TrySelectCountry(string sessionId, string playerId, string countryId)
     {
         var state = GetGameState(sessionId);

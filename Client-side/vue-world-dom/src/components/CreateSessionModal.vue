@@ -26,7 +26,7 @@ async function onSessionNameInput(e) {
 async function onCreateClick() {
   const createResult = await createSession(sessionName.value)
   if (!createResult.success) {
-    emit('update:isTaken', createResult.reason === 'NameTaken')
+    emit('update:isTaken', createResult.error === 'NameTaken')
     return
   }
 
