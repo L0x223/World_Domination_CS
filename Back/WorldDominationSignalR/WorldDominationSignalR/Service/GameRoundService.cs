@@ -38,7 +38,7 @@ public class GameRoundService : IGameRoundService
 
             session.Phase = GamePhase.InProgress;
             session.Round = 1;
-            session.Ecology = 0.8;
+            session.EcologyHistory.Add(session.Ecology) ;
         }
     }
 

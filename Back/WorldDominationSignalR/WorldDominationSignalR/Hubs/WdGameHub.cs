@@ -298,7 +298,7 @@ public class WdGameHub : Hub
                     }).ToList()
                 };
             }).ToList();
-
+        
         return new RoundResolvedDto
         {
             Round = session.Round,

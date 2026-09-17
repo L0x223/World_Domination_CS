@@ -8,10 +8,11 @@ import {
   onRoundResolved, offRoundResolved,
   onTurnEnded, offTurnEnded,
   onGameOver, offGameOver,
-  endTurn, getMyGameState, submitTurnAction
+  rejoinSession, getMyGameState, submitTurnAction
 } from '@/server/RequstHandlers'
 import MyCountryPanel from '@/components/MyCountryPanel.vue'
 import EndTurnButton from '@/components/EndTurnButton.vue'
+import OpponentActionsPanel from '@/components/OpponentActionsPanel.vue'
  
 const view = ref(null)      // RoundResolvedDto
 const controls = ref(null)  // ControlPanelDto
@@ -82,7 +83,7 @@ function handleTurnEnded(playerId) {
 function handleGameOver(winnerPlayerId) {
   gameOverWinnerId.value = winnerPlayerId
 }
- 
+
 async function handleEndTurn() {
   if (controls.value.hasEndedTurn) {
     return
@@ -103,21 +104,63 @@ async function handleEndTurn() {
   }
 }
 
+function handleToggleSanction(playerId) {
+  if (pending.sanctionTogglePlayerIds.has(playerId)) {
+    pending.sanctionTogglePlayerIds.delete(playerId)
+  } else {
+    pending.sanctionTogglePlayerIds.add(playerId)
+  }
+}
+
+function handleToggleStrike({ defenderPlayerId, cityId }) {
+  const idx = pending.nukeStrikes.findIndex(
+    s => s.defenderPlayerId === defenderPlayerId && s.cityId === cityId
+  )
+  if (idx >= 0) {
+    pending.nukeStrikes.splice(idx, 1)
+  } else {
+    pending.nukeStrikes.push({ defenderPlayerId, cityId })
+  }
+}
+
 onMounted(async () => {
+
+    if (connection.state !== 'Connected') {
+    await new Promise(resolve => {
+      const check = setInterval(() => {
+        if (connection.state === 'Connected') {
+          clearInterval(check)
+          resolve()
+        }
+      }, 50)
+    })
+  }
+  const result = await rejoinSession(
+      SessionState.sessionId,
+      Player.id
+    )
+
+    if (!result.success) {
+      console.error('Failed to rejoin session:', result.error)
+      window.location.hash = '/'
+      return
+    }
+
   if (!SessionState.sessionId || !Player.id) {
     window.location.hash = '/'
     return
   }
+
+  onGameStarted(handleGameStarted)
+  onRoundResolved(handleRoundResolved)
+  onTurnEnded(handleTurnEnded)
+  onGameOver(handleGameOver)
 
   const initial = await getMyGameState(SessionState.sessionId, Player.id)
   if (initial) {
     view.value = initial.view
     controls.value = initial.controls
   }
-  onGameStarted(handleGameStarted)
-  onRoundResolved(handleRoundResolved)
-  onTurnEnded(handleTurnEnded)
-  onGameOver(handleGameOver)
 })
  
 onUnmounted(() => {
@@ -141,17 +184,28 @@ onUnmounted(() => {
  
   <div v-else class="game-screen">
     <h1>Round {{ view.round }} / {{ view.maxRounds }}</h1>
- 
+    <div class="game-layout">
+      <div class="main-column">
     <MyCountryPanel 
     :country="view.me" 
     :controls="controls" 
     :ecology-history="view.ecologyHistory" 
     :pending="pending"/>
- 
+
     <EndTurnButton
-      :has-ended-turn="controls.hasEndedTurn"
-      @end-turn="handleEndTurn"
+    :has-ended-turn="controls.hasEndedTurn"
+    @end-turn="handleEndTurn"
     />
+  </div>
+  <OpponentActionsPanel 
+  :controls="controls"
+  :opponents="controls.foreignCountries" 
+  :pending-sanctions="pending.sanctionTogglePlayerIds" 
+  :pending-strikes="pending.nukeStrikes" 
+  @toggle-sanction="handleToggleSanction" 
+  @toggle-strike="handleToggleStrike" />
+ </div>
+
   </div>
 </template>
  
@@ -162,5 +216,11 @@ onUnmounted(() => {
   margin-top: 40px;
   font-size: 1.2em;
 }
+.game-layout { 
+  display: grid;
+   grid-template-columns: minmax(0, 1fr) 320px; 
+   gap: 16px; 
+   align-items: start; } 
+.main-column { min-width: 0; }
 </style>
  

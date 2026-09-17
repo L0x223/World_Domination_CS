@@ -20,7 +20,6 @@ const localBudget = computed(() => {
   return budget
 })
 
-const canAfford = computed(() => localBudget.value >= 0)
 const nukeBuildCount = ref(1)
 const buildNukes = ref(false)
 
@@ -95,6 +94,7 @@ function toggleBuildNukes() {
           <label class="action-row">
             <input
               type="checkbox"
+              :checked="props.pending.investCityIds.has(city.cityId)""
               :disabled="!props.pending.investCityIds.has(city.cityId) && 
               localBudget < props.controls.costInvest "
               @change="toggleInvest(city.cityId)"

@@ -8,12 +8,12 @@
       {
         "id": "BLR_MINSK",
         "name": "Minsk",
-        "startingEconomic": 0.7
+        "startingEconomic": 0.8
       },
       {
         "id": "BLR_BOBRUYSK",
         "name": "Bobruysk",
-        "startingEconomic": 0.5
+        "startingEconomic": 0.7
       },
       {
         "id": "BLR_BREST",
@@ -23,7 +23,7 @@
       {
         "id": "BLR_GRODNO",
         "name": "Grodno",
-        "startingEconomic": 0.6
+        "startingEconomic": 0.5
       }
     ]
   },
@@ -104,7 +104,7 @@
       {
         "id": "CHN_GUANGZHOU",
         "name": "Guangzhou",
-        "startingEconomic": 0.6
+        "startingEconomic": 0.5
       }
     ]
   }
