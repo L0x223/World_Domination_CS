@@ -117,11 +117,31 @@ public class GameRoundService : IGameRoundService
         {
             var byCountry = GetAliveCountry(session, byPlayerId);
             var onCountry = GetAliveCountry(session, onPlayerId);
-            if (byCountry is null || onCountry is null || byPlayerId == onPlayerId) return false;
 
-            // toggle: if already staged, un-stage it (cancels the pending change)
+            if (byCountry is null ||
+                onCountry is null ||
+                byPlayerId == onPlayerId)
+            {
+                Console.WriteLine(
+                    $"SANCTION FAILED: {byPlayerId} -> {onPlayerId}"
+                );
+
+                return false;
+            }
+
             if (!onCountry.PendingSanctionToggles.Remove(byPlayerId))
+            {
                 onCountry.PendingSanctionToggles.Add(byPlayerId);
+                Console.WriteLine(
+                    $"SANCTION STAGED: {byPlayerId} -> {onPlayerId}"
+                );
+            }
+            else
+            {
+                Console.WriteLine(
+                    $"SANCTION CANCELLED: {byPlayerId} -> {onPlayerId}"
+                );
+            }
 
             return true;
         }
@@ -176,8 +196,8 @@ public class GameRoundService : IGameRoundService
                 return false;
 
             ResolveNukeStrikes(session);
-            ResolveEconomyAndActions(session, aliveCountries);
             ResolveSanctions(aliveCountries);
+            ResolveEconomyAndActions(session, aliveCountries);
             
             session.EcologyHistory.Add(session.Ecology);
             session.PendingNukeStrikes.Clear();
@@ -322,8 +342,7 @@ public class GameRoundService : IGameRoundService
             }
             else if (aliveCountries.Count > 1)
             {
-                // highest budget wins on round-limit/ecology-collapse ties
-                session.WinnerPlayerId = aliveCountries.OrderByDescending(c => c.Budget).First().PlayerId;
+                session.WinnerPlayerId = aliveCountries.OrderByDescending(c => c.GetWealth(session.Ecology)).First().PlayerId;
             }
         }
     }

@@ -9,7 +9,8 @@ public class CountryGameState
     public int NukeCount { get; set; } = 0;
     public bool IsEliminated { get; set; } = false;
     public bool EndedTurn { get; set; } = false;
-
+    public double GetWealth(double ecology) => 
+        Math.Round(Cities.Sum(c => (3 * c.Economic + 2 * ecology) / 5) / Cities.Count, 2);
     public HashSet<string> SanctionedBy { get; set; } = new();         
     public HashSet<string> PendingSanctionToggles { get; set; } = new();
 

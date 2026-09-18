@@ -72,21 +72,17 @@ function onStrikeChange(playerId, cityId) {
   })
 }
 
-function isStrikeDisabled(playerId, cityId) {
-  const checked = isStrikeChecked(playerId, cityId)
+function isStrikeDisabled(city, playerId) {
+  const checked = isStrikeChecked(playerId, city.cityId)
 
   if (checked) {
     return false
   }
 
-  if (!props.opponents
-      .find(o => o.playerId === playerId)
-      ?.cities.find(c => c.cityId === cityId)
-      ?.canStrike) {
+  if (!city.canStrike) {
     return true
   }
 
-  // No nukes left
   return nukesAvailable.value <= 0
 }
 </script>

@@ -242,7 +242,6 @@ public class GameStateService : IGameStateService
             state.DisconnectTimers.Remove(playerId);
         }
     }
-    //
     
     public bool TrySetReady(string sessionId, string playerId, bool isReady)
     {

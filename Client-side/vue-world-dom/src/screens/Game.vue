@@ -17,7 +17,7 @@ import OpponentActionsPanel from '@/components/OpponentActionsPanel.vue'
 const view = ref(null)      // RoundResolvedDto
 const controls = ref(null)  // ControlPanelDto
 const waitingOnPlayerIds = reactive(new Set())
-const gameOverWinnerId = ref(null)
+const gameOverWinner = ref(null)
  
 
 const pending = reactive({
@@ -80,8 +80,8 @@ function handleTurnEnded(playerId) {
   waitingOnPlayerIds.add(playerId)
 }
  
-function handleGameOver(winnerPlayerId) {
-  gameOverWinnerId.value = winnerPlayerId
+function handleGameOver(gameOver) {
+  gameOverWinner.value = gameOver
 }
 
 async function handleEndTurn() {
@@ -90,6 +90,8 @@ async function handleEndTurn() {
   }
 
   const action = buildTurnActionDto()
+  
+  console.log('Submitting turn actions:', action)
 
   try {
     await submitTurnAction(
@@ -171,15 +173,21 @@ onUnmounted(() => {
 })
 </script>
  
-<template>
-  <div v-if="!view" class="loading">
-    Waiting for game to start...
-  </div>
- 
-  <div v-else-if="gameOverWinnerId !== null || view.gameOver" class="game-over">
-    <h1>Game Over</h1>
-    <p v-if="gameOverWinnerId">Winner: {{ gameOverWinnerId }}</p>
-    <p v-else>No winner.</p>
+  <template>
+    <div v-if="!view" class="loading">
+      Waiting for game to start...
+    </div>
+  
+    <div v-else-if="gameOverWinner !== null || view.gameOver" class="game-over">
+      <h1>Game Over</h1>
+      <template v-if="gameOverWinner">
+      <h2>Winner: {{ gameOverWinner.winnerNickname }}({{ gameOverWinner.winnerNickname }})</h2>
+      <p>Wealth: {{ gameOverWinner.winnerWealth }}</p>
+  </template>
+
+  <p v-else>
+    No winner.
+  </p>
   </div>
  
   <div v-else class="game-screen">

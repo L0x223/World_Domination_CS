@@ -9,7 +9,5 @@ public class CityState
     
     public bool InvestRequested { get; set; } = false;
     public bool ShieldRequested { get; set; } = false;
-
-    public double GetWealth(double ecology) => Math.Round((3 * Economic + 2 * ecology) / 5, 2);
     public int GetIncome() => (int)Math.Round(250 * Economic);
 }

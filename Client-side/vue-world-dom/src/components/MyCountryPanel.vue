@@ -39,14 +39,6 @@ function toggleShield(cityId) {
   }
 }
 
-function toggleSanction(playerId) {
-  if (props.pending.sanctionTogglePlayerIds.has(playerId)) {
-    props.pending.sanctionTogglePlayerIds.delete(playerId)
-  } else {
-    props.pending.sanctionTogglePlayerIds.add(playerId)
-  }
-}
-
 function toggleNukeTech() {
   props.pending.nukeTech = !props.pending.nukeTech
 }
@@ -94,7 +86,7 @@ function toggleBuildNukes() {
           <label class="action-row">
             <input
               type="checkbox"
-              :checked="props.pending.investCityIds.has(city.cityId)""
+              :checked="props.pending.investCityIds.has(city.cityId)"
               :disabled="!props.pending.investCityIds.has(city.cityId) && 
               localBudget < props.controls.costInvest "
               @change="toggleInvest(city.cityId)"
@@ -135,6 +127,7 @@ function toggleBuildNukes() {
         <label class="action-row">
           <input
             type="checkbox"
+            :checked="props.pending.ecologyInvest"
             :disabled="localBudget < props.controls.costEcology
             && !props.pending.ecologyInvest"
             @change="toggleEcologyInvest"

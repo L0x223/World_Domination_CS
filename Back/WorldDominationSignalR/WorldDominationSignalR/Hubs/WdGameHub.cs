@@ -391,8 +391,28 @@ public class WdGameHub : Hub
 
             if (session.GameOver)
             {
-                await Clients.Group(sessionId)
-                    .SendAsync("GameOver", session.WinnerPlayerId);
+                var winnerId = session.WinnerPlayerId;
+
+                if (winnerId is not null &&
+                    session.PlayersById.TryGetValue(winnerId, out var winnerPlayer) &&
+                    session.CountryStateByPlayerId.TryGetValue(winnerId, out var winnerCountry))
+                {
+                    var winnerState = session.CountryStateByPlayerId[winnerId];
+
+                    var winnerCountryName = _countryDataService
+                        .GetAll()
+                        .First(c => c.Id == winnerState.CountryId);
+                    var gameOver = new GameOverDto
+                    {
+                        WinnerPlayerId = winnerId,
+                        WinnerNickname = winnerPlayer.Nickname,
+                        WinnerCountry = winnerCountryName.Name,
+                        WinnerWealth = winnerCountry.GetWealth(session.Ecology)
+                    };
+
+                    await Clients.Group(sessionId)
+                        .SendAsync("GameOver", gameOver);
+                }
             }
         }
         else
