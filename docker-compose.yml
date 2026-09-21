@@ -1,0 +1,44 @@
+services:
+
+  backend:
+    build:
+      context: ./Back/WorldDominationSignalR/WorldDominationSignalR
+
+    restart: unless-stopped
+
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:8080
+
+    expose:
+      - "8080"
+
+
+  frontend:
+    build:
+      context: ./Client-side/vue-world-dom
+
+    restart: unless-stopped
+
+    # Optional: keep this if you want to access the game
+    # directly through http://localhost
+    ports:
+      - "80:80"
+
+    depends_on:
+      - backend
+
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+
+    restart: unless-stopped
+
+    command:
+      - tunnel
+      - --no-autoupdate
+      - --url
+      - http://frontend:80
+
+    depends_on:
+      - frontend
